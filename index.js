@@ -1,6 +1,7 @@
 const fs = require("fs");
 const { exec } = require("child_process");
 const readline = require("readline");
+const removeMd = require('remove-markdown');
 
 // Send text to Piper and play audio
 async function speakText(text) {
@@ -94,7 +95,8 @@ function promptUser() {
     console.log("Ollama reply:", ollamaReply);
 
     if (ollamaReply) {
-      await speakText(ollamaReply);
+      const removeMarkdown = removeMd(ollamaReply);
+      await speakText(removeMarkdown);
     }
 
     promptUser();
