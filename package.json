@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@langchain/ollama": "^1.0.3",
     "@picovoice/cobra-node": "^2.1.0",
     "@picovoice/leopard-node": "^2.0.6",
     "audio-buffer-from": "^1.1.1",

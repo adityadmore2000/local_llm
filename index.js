@@ -1,8 +1,15 @@
-const fs = require("fs");
-const { exec } = require("child_process");
-const readline = require("readline");
-const removeMd = require('remove-markdown');
+import fs from "fs";
+import { ChatOllama } from "@langchain/ollama";
+import { OLLAMA_BASE, MODEL } from "./config.js";
+import { exec } from "child_process";
+import readline from "readline";
+import removeMd from 'remove-markdown';
 
+
+const llm = new ChatOllama({
+  baseUrl: OLLAMA_BASE,
+  model: MODEL,
+});
 // Send text to Piper and play audio
 async function speakText(text) {
   try {
@@ -32,45 +39,11 @@ async function speakText(text) {
 
 async function getOllamaResponse(prompt) {
   try {
-    const response = await fetch("http://localhost:11434/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "llama3.1",
-        messages: [{ role: "user", content: prompt }],
-        stream: true
-      }),
-    });
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-
-    let fullText = "";
-
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value);
-
-      // Ollama sends multiple JSON objects concatenated
-      const lines = chunk.split("\n").filter(l => l.trim().length > 0);
-
-      for (const line of lines) {
-        try {
-          const json = JSON.parse(line);
-
-          if (json.message && json.message.content) {
-            fullText += json.message.content;
-          }
-
-        } catch (err) {
-          // Skip broken JSON lines
-        }
-      }
-    }
-
-    return fullText.trim();
+    // const reader = response.body.getReader();
+    // const decoder = new TextDecoder();
+    const response = await llm.invoke(prompt);
+    return response.content.trim();
 
   } catch (err) {
     console.error("Error fetching Ollama:", err);
