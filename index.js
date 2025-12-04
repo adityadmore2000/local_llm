@@ -41,13 +41,14 @@ function playBufferWithFFplay(buffer) {
 // ---------- Call Coqui TTS endpoint and return WAV bytes (Buffer) ----------
 async function fetchCoquiWav(text, opts = {}) {
   const {
-    baseUrl = "http://localhost:5002",
+    baseUrl = "http://localhost:5003",
     speaker_id = "p376",
-    speaker_style = "",
-    language = "",
+    // speaker_style = "",
+    // language = "",
   } = opts;
 
-  const url = `${baseUrl}/api/tts?text=${encodeURIComponent(text)}&speaker_id=${encodeURIComponent(speaker_id)}&speaker_style=${encodeURIComponent(speaker_style)}&language=${encodeURIComponent(language)}`;
+  // const url = `${baseUrl}/api/tts?text=${encodeURIComponent(text)}&speaker_id=${encodeURIComponent(speaker_id)}&speaker_style=${encodeURIComponent(speaker_style)}&language=${encodeURIComponent(language)}`;
+  const url = `${baseUrl}/api/tts?text=${encodeURIComponent(text)}&speaker_id=${encodeURIComponent(speaker_id)}`;
 
   const res = await fetch(url, { method: "GET" });
   if (!res.ok) {
@@ -92,7 +93,7 @@ async function getOllamaResponseStreamToTTS(prompt, ttsOpts = {}) {
       // Decide when to emit/send chunk to TTS:
       // - end punctuation OR
       // - buffer exceeds max length (characters)
-      if (/[.!?]\s*$/.test(textBuffer) || textBuffer.length > 120) {
+      if (/[.!?]["']?\s*$/.test(textBuffer) && textBuffer.length > 120){
         const toSpeak = removeMd(textBuffer).trim();
         if (toSpeak.length > 0) {
           // Fire off fetch + playback (queued) but don't block streaming tokens
@@ -139,7 +140,7 @@ function promptLoop() {
 
     try {
       // ttsOpts: pass speaker/style/lang if needed
-      await getOllamaResponseStreamToTTS(input, { baseUrl: "http://localhost:5002", speaker_id: "p376" });
+      await getOllamaResponseStreamToTTS(input, { baseUrl: "http://localhost:5003", speaker_id: "p376" });
     } catch (err) {
       console.error("Failed streaming:", err);
     }
